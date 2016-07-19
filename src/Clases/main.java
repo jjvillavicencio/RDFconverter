@@ -3,19 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rdfconverter;
+package Clases;
 
 /**
  *
  * @author jjvillavicencio
  */
-public class RDFconverter {
-
-    /**
-     * @param args the command line arguments
-     */
+public class main {
     public static void main(String[] args) {
-        // TODO code application logic here
+        Interfaz.Vista1 inicio = new Interfaz.Vista1();
+        inicio.setVisible(true);
     }
-    
 }
