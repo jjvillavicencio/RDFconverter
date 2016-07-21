@@ -1,14 +1,19 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Clases;
+
+import java.sql.Connection;
 
 /**
  *
- * @author jjvillavicencio
- */
+ * 
+ * @author John Villavicencio
+ * @author Vanessa Sotomayor
+ * @author Jackson Masache
+ * 
+ * 
+ **/
+
 public class VariablesGlobales {
-    public static Clases.ConexionSGBD conGlobal = new Clases.ConexionSGBD();
+
+    public static Clases.ConexionSGBD conMySqlGlobal = new Clases.ConexionSGBD();
+
 }

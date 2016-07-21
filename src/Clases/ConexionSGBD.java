@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Clases;
 
 import java.sql.Connection;
@@ -12,14 +7,23 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import oracle.jdbc.driver.OracleDriver;
 
 /**
  *
- * @author jjvillavicencio
- */
+ * 
+ * @author John Villavicencio
+ * @author Vanessa Sotomayor
+ * @author Jackson Masache
+ * 
+ * 
+ **/
+
 public class ConexionSGBD {
+
     private int SGBD;
     private Connection con;
+    private ArrayList db;
     private ArrayList tablas;
     private TablaAlias tablaAlias;
     private ArrayList descripcionTablas;
@@ -41,28 +45,30 @@ public class ConexionSGBD {
         this.descripcionTablas = new ArrayList();
         this.tablaAlias = new TablaAlias();
         this.tablas = new ArrayList();
+        this.db = new ArrayList();
     }
 
-    public boolean crearConexionPostgreSql(String UsuarioDB, String HOST, String PUERTO, String NombreDB, String PASS) throws ClassNotFoundException {
+    public boolean crearConexionOracle(String UsuarioDB, String HOST, String PUERTO, String SID, String PASS) {
         try {
             this.usuario = UsuarioDB;
             //System.out.println(connection);
-            
-            Class.forName("org.postgresql.Driver");
+            OracleDriver oracleDriver = new oracle.jdbc.driver.OracleDriver();
+            DriverManager.registerDriver(oracleDriver);
             if (con == null || con.isClosed() == true) {
-                String cadenaConexion = "jdbc:postgresql://" + HOST + ":" + PUERTO + "/" + NombreDB;
+                String cadenaConexion = "jdbc:oracle:thin:@" + HOST + ":" + PUERTO + ":" + SID;
+
                 con = DriverManager.getConnection(cadenaConexion, UsuarioDB, PASS);
             }
-            JOptionPane.showMessageDialog(null, "Conexión a POSTGRESQL exitosa");
+            JOptionPane.showMessageDialog(null, "Conexión a ORACLE exitosa");
             return true;
         } catch (SQLException ex) {
-            System.out.println(ex);
-            JOptionPane.showMessageDialog(null, "No se pudo conectar a POSTGRESQL");
+            JOptionPane.showMessageDialog(null, "No se pudo conectar a ORACLE");
+            //Logger.getLogger(ConexionSGBD.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
 
-    public Connection getConexionPostgreSql() {
+    public Connection getConexionOracle() {
         return con;
     }
     /*
@@ -70,12 +76,67 @@ public class ConexionSGBD {
      * base de datos
      */
 
-    public void cerrarPosgreSql() throws SQLException {
+    public void cerrarOracle() throws SQLException {
         if (con != null && con.isClosed() == false) {
             con.close();
         }
     }
 
+    //Método para crear una conexión a BD MySql
+    public boolean crearConexionMySQL(String UsuarioDB, String ClaveDB) {
+        try {
+            DriverManager.registerDriver(new org.gjt.mm.mysql.Driver());
+            String url = "jdbc:mysql://127.0.0.1:3306/";
+            //Se envian los parametros de conexión
+            con = DriverManager.getConnection(url, UsuarioDB, ClaveDB);
+            JOptionPane.showMessageDialog(null, "Conexión a MySQL exitosa");
+            return true;
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "No se pudo conectar a MySQL");
+            return false;
+        }
+    }
+
+    public Connection getConexionMySQL() {
+        return con;
+    }
+
+    //Método para Obtener todas las Bases de Datos de Motor de Base de datos
+    public Boolean todasBD(Connection con) {
+
+        try {
+            String _selectDB = "";
+            String _listDB = "";
+            if (SGBD == 0) {
+                _selectDB = "USE " + "information_schema";
+                _listDB = "SELECT SCHEMA_NAME FROM SCHEMATA";
+            }
+
+            //Crear Consulta
+            Statement stmt = con.createStatement();
+            ResultSet rs;
+            //Ejecutar sentencia
+            stmt.executeQuery(_selectDB);
+            //Ejecutar Consulta
+            rs = stmt.executeQuery(_listDB);
+            //Recorrer el resultado de la Consulta
+            while (rs.next()) {
+                //Obtener el valor de la columna "Database"
+                String r = rs.getString("SCHEMA_NAME");
+                //Agregar a un ArrayList
+                db.add(r);
+            }
+            return true;
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    //Retornar ArrayList con tods las Bases de Datos
+    public ArrayList getTodasBD() {
+        return db;
+    }
 
     //Obtener todas las tablas de la Base de Datos seleccionada
     public Boolean todasTablas() {
@@ -87,10 +148,14 @@ public class ConexionSGBD {
             ResultSet rs;
 
             if (SGBD == 0) {
+                //Crear sentencia para MySql "USE dtabase"
+                _selectDB = "USE " + "information_schema";
+                //Ejecutar sentencia
+                stmt.executeQuery(_selectDB);
                 //Crear sentencia para MySql "SHOW TABLES"
-                _showTablas = "SELECT tablename as TABLE_NAME FROM pg_tables WHERE schemaname = 'public' ";
+                _showTablas = "SELECT `TABLE_NAME` FROM `TABLES` WHERE `TABLE_SCHEMA`= '" + baseDatos + "'";
             } else {
-                //PARA MYSQL
+                _showTablas = "select TABLE_NAME from ALL_ALL_TABLES where OWNER = '" + usuario.toUpperCase() + "'";
             }
 
             //Ejecutar sentencia
@@ -99,13 +164,11 @@ public class ConexionSGBD {
             //Recorrer resultado de la consulta asignar en un ArrayList
             while (rs.next()) {
                 String r = rs.getString("TABLE_NAME");
-                System.out.println(r);
                 tablas.add(r);
             }
 
             return true;
         } catch (SQLException ex) {
-            System.out.println(ex);
             JOptionPane.showMessageDialog(null, "No se pudo cargar las tablas");
             return false;
         }
@@ -334,4 +397,5 @@ public class ConexionSGBD {
     public Connection getCon() {
         return con;
     }
+
 }

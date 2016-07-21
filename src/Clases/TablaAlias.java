@@ -1,17 +1,19 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Clases;
 
 import java.util.ArrayList;
 
 /**
  *
- * @author jjvillavicencio
- */
+ * 
+ * @author John Villavicencio
+ * @author Vanessa Sotomayor
+ * @author Jackson Masache
+ * 
+ * 
+ **/
+
 public class TablaAlias {
+
     private ArrayList<Alias> nuevo;
     private int tamaño;
 
@@ -34,4 +36,5 @@ public class TablaAlias {
     public void setTamaño() {
         this.tamaño = nuevo.size();
     }
+
 }

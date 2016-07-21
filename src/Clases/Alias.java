@@ -1,15 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Clases;
 
 /**
  *
- * @author jjvillavicencio
- */
+ * 
+ * @author John Villavicencio
+ * @author Vanessa Sotomayor
+ * @author Jackson Masache
+ * 
+ * 
+ **/
+
 public class Alias {
+
     private String Original;
     private String Alias;
     private String Key;
@@ -37,4 +39,5 @@ public class Alias {
     public void setKey(String Key) {
         this.Key = Key;
     }
+
 }
