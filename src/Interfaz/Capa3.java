@@ -251,6 +251,7 @@ public class Capa3 extends javax.swing.JFrame {
 
         DefaultTableModel modelo = borrarTabla((DefaultTableModel) jTable1.getModel());
         jTable1.setModel(modelo);
+        conSGBD.resetDesTablaALias();
     }//GEN-LAST:event_jb_Seleccionar1ActionPerformed
 
     /**

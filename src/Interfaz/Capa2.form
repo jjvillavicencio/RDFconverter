@@ -59,7 +59,7 @@
                               <Component id="jLabel5" alignment="1" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel7" alignment="1" min="-2" max="-2" attributes="0"/>
-                              <Component id="jLabel8" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Component id="jl_TagBD" alignment="1" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" max="-2" attributes="0">
@@ -142,7 +142,7 @@
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jl_TagBD" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jtf_Sid" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" max="32767" attributes="0"/>
@@ -259,9 +259,10 @@
         <Component class="javax.swing.JComboBox" name="jcb_Sgbd">
           <Properties>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="2">
+              <StringArray count="3">
                 <StringItem index="0" value="MySQL"/>
                 <StringItem index="1" value="ORACLE"/>
+                <StringItem index="2" value="PostgreSQL"/>
               </StringArray>
             </Property>
           </Properties>
@@ -292,7 +293,7 @@
             <Property name="text" type="java.lang.String" value="1521"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel8">
+        <Component class="javax.swing.JLabel" name="jl_TagBD">
           <Properties>
             <Property name="text" type="java.lang.String" value="SID:"/>
           </Properties>

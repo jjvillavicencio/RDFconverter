@@ -62,7 +62,7 @@ public class Capa2 extends javax.swing.JFrame {
         jtf_Host = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jtf_Puerto = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
+        jl_TagBD = new javax.swing.JLabel();
         jtf_Sid = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -119,7 +119,7 @@ public class Capa2 extends javax.swing.JFrame {
 
         jLabel5.setText("SGBD:");
 
-        jcb_Sgbd.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "MySQL", "ORACLE" }));
+        jcb_Sgbd.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "MySQL", "ORACLE", "PostgreSQL" }));
         jcb_Sgbd.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jcb_SgbdItemStateChanged(evt);
@@ -141,7 +141,7 @@ public class Capa2 extends javax.swing.JFrame {
         jtf_Puerto.setEditable(false);
         jtf_Puerto.setText("1521");
 
-        jLabel8.setText("SID:");
+        jl_TagBD.setText("SID:");
 
         jtf_Sid.setEditable(false);
         jtf_Sid.setText("xe");
@@ -168,7 +168,7 @@ public class Capa2 extends javax.swing.JFrame {
                             .addComponent(jLabel5)
                             .addComponent(jLabel6)
                             .addComponent(jLabel7)
-                            .addComponent(jLabel8))
+                            .addComponent(jl_TagBD))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jcb_SeleccionarBD, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -231,7 +231,7 @@ public class Capa2 extends javax.swing.JFrame {
                     .addComponent(jtf_Puerto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
+                    .addComponent(jl_TagBD)
                     .addComponent(jtf_Sid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -302,11 +302,26 @@ public class Capa2 extends javax.swing.JFrame {
             con = conSGBD.getConexionMySQL();
             jcb_SeleccionarBD.setEnabled(true);
 
-        } else {
+        } 
+        
+        if (jcb_Sgbd.getSelectedIndex() == 1) {
             conSGBD.setSGBD(1);
             conexion = conSGBD.crearConexionOracle(UsuarioDB, HostDB, PuertoDB, SidDB, ClaveDB);
             con = conSGBD.getConexionOracle();
             jcb_SeleccionarBD.setEnabled(false);
+        }
+        
+        if (jcb_Sgbd.getSelectedIndex() == 2) {            
+            try {
+                
+                conSGBD.setSGBD(2);
+                conexion = conSGBD.crearConexionPostgreSql(UsuarioDB, HostDB, PuertoDB, SidDB, ClaveDB);
+                jcb_SeleccionarBD.setEnabled(false);                
+                con = conSGBD.getConexionPostgreSql();
+                
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Capa2.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         //Clases.ConexionMysql nuevo = new Clases.ConexionMysql();
@@ -333,7 +348,8 @@ public class Capa2 extends javax.swing.JFrame {
     }//GEN-LAST:event_jb_Conectar1ActionPerformed
 
     private void jb_Continuar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Continuar1ActionPerformed
-
+        System.out.println("Número SGBD => "+conSGBD.getSGBD());
+        
         if (conSGBD.getSGBD() == 0) {
             conSGBD.setBaseDatos(jcb_SeleccionarBD.getSelectedItem().toString());
         }
@@ -348,19 +364,33 @@ public class Capa2 extends javax.swing.JFrame {
 
     private void jcb_SgbdItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jcb_SgbdItemStateChanged
         try {
+            System.out.println("Seleccion SGBD => "+jcb_Sgbd.getSelectedIndex());
+            
             if (conSGBD.getCon() == null) {
             } else {
                 conSGBD.getCon().close();
             }
+            
             if (jcb_Sgbd.getSelectedIndex() == 0) {
 
                 jtf_Host.setEditable(false);
                 jtf_Puerto.setEditable(false);
                 jtf_Sid.setEditable(false);
-            } else {
+            } 
+            
+            if (jcb_Sgbd.getSelectedIndex() == 1) {
                 jtf_Host.setEditable(true);
                 jtf_Puerto.setEditable(true);
                 jtf_Sid.setEditable(true);
+            }
+            
+            if (jcb_Sgbd.getSelectedIndex() == 2) {
+                jtf_Host.setEditable(true);
+                jtf_Puerto.setEditable(true);
+                jtf_Sid.setEditable(true);
+                jtf_Sid.setText("postgres");
+                jtf_Puerto.setText("5432");
+                jl_TagBD.setText("Nombre BD:");
             }
         } catch (SQLException ex) {
             Logger.getLogger(Capa2.class.getName()).log(Level.SEVERE, null, ex);
@@ -414,7 +444,6 @@ public class Capa2 extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSeparator jSeparator1;
     public static javax.swing.JButton jb_Conectar1;
@@ -424,6 +453,7 @@ public class Capa2 extends javax.swing.JFrame {
     private javax.swing.JComboBox jcb_Sgbd;
     private javax.swing.JLabel jl_ImgCorrecto;
     private javax.swing.JLabel jl_ImgError;
+    private javax.swing.JLabel jl_TagBD;
     private javax.swing.JPasswordField jpf_ClaveBD;
     private javax.swing.JTextField jtf_Host;
     private javax.swing.JTextField jtf_Puerto;

@@ -71,6 +71,30 @@ public class ConexionSGBD {
     public Connection getConexionOracle() {
         return con;
     }
+    
+    
+    public boolean crearConexionPostgreSql(String UsuarioDB, String HOST, String PUERTO, String SID, String PASS) throws ClassNotFoundException {
+        try {
+            this.usuario = UsuarioDB;
+            //System.out.println(connection);
+            
+            Class.forName("org.postgresql.Driver");
+            if (con == null || con.isClosed() == true) {
+                String cadenaConexion = "jdbc:postgresql://" + HOST + ":" + PUERTO + "/" + SID;
+                con = DriverManager.getConnection(cadenaConexion, UsuarioDB, PASS);
+            }
+            JOptionPane.showMessageDialog(null, "Conexión a POSTGRESQL exitosa");
+            return true;
+        } catch (SQLException ex) {
+            System.out.println(ex);
+            JOptionPane.showMessageDialog(null, "No se pudo conectar a POSTGRESQL");
+            return false;
+        }
+    }
+
+    public Connection getConexionPostgreSql() {
+        return con;
+    }
     /*
      * Con este metodo cerramos la conexion una vez hayamos terminado de usar la
      * base de datos
@@ -154,8 +178,14 @@ public class ConexionSGBD {
                 stmt.executeQuery(_selectDB);
                 //Crear sentencia para MySql "SHOW TABLES"
                 _showTablas = "SELECT `TABLE_NAME` FROM `TABLES` WHERE `TABLE_SCHEMA`= '" + baseDatos + "'";
-            } else {
+            } 
+            
+            if (SGBD == 1) {
                 _showTablas = "select TABLE_NAME from ALL_ALL_TABLES where OWNER = '" + usuario.toUpperCase() + "'";
+            }
+            
+            if (SGBD == 2) {
+                _showTablas = "SELECT tablename as TABLE_NAME FROM pg_tables WHERE schemaname = 'public' ";
             }
 
             //Ejecutar sentencia
@@ -170,6 +200,7 @@ public class ConexionSGBD {
             return true;
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "No se pudo cargar las tablas");
+            System.out.println("Error al cargar tablas:\n" + ex);
             return false;
         }
     }
@@ -181,7 +212,7 @@ public class ConexionSGBD {
 
     //Obtener descripción de la tabla (nombre de columnas y clave primaria)
     public Boolean describirTabla(Connection con, String tabla) {
-        String _desTabla;
+        String _desTabla ="";
         String _primaria = "";
         String pri = "no hay";
         String columna = "";
@@ -194,7 +225,8 @@ public class ConexionSGBD {
                 _desTabla = "SELECT `COLUMN_NAME`, `COLUMN_KEY` FROM `COLUMNS` WHERE `TABLE_NAME`= '" + tabla + "' AND `TABLE_SCHEMA` = '" + this.baseDatos + "'";
                 pri = "PRI";
                 columna = "COLUMN_KEY";
-            } else {
+            } 
+            if (SGBD == 1) {
                 _desTabla = "select COLUMN_NAME from ALL_TAB_COLUMNS where OWNER = '" + usuario.toUpperCase() + "' AND TABLE_NAME = '" + tabla.toUpperCase() + "'";
                 _primaria = "SELECT COLUMN_NAME, TABLE_NAME, CONSTRAINT_NAME\n"
                         + "FROM ALL_CONS_COLUMNS\n"
@@ -212,6 +244,26 @@ public class ConexionSGBD {
                     columna = "COLUMN_NAME";
                 }
 
+            }
+            
+            if (SGBD == 2){
+                _desTabla = "SELECT a.attname as column_name, t.typname as data_type,\n"
+                        + "CASE\n"
+                        + "WHEN cc.contype='p' THEN 'PRI'\n"
+                        + "WHEN cc.contype='u' THEN 'UNI'\n"
+                        + "WHEN cc.contype='f' THEN 'FK'\n"
+                        + "ELSE '' END AS key,\n"
+                        + "CASE WHEN a.attnotnull=false THEN 'YES' ELSE 'NO' END AS is_nullable, CASE WHEN a.attlen= '-1' \n"
+                        + "THEN (a.atttypmod -4) ELSE a.attlen END as max_length,\n"
+                        + "d.adsrc as column_default\n"
+                        + "FROM pg_catalog.pg_attribute a\n"
+                        + "LEFT JOIN pg_catalog.pg_type t ON t.oid = a.atttypid\n"
+                        + "LEFT JOIN pg_catalog.pg_class c ON c.oid = a.attrelid\n"
+                        + "LEFT JOIN pg_catalog.pg_constraint cc ON cc.conrelid = c.oid AND cc.conkey[1] = a.attnum\n"
+                        + "LEFT JOIN pg_catalog.pg_attrdef d ON d.adrelid = c.oid AND a.attnum = d.adnum\n"
+                        + "WHERE c.relname = '"+tabla+"' AND a.attnum > 0 AND t.oid = a.atttypid";
+                pri = "PRI";
+                columna = "key";
             }
 
             //Nuevo objeto Alias (Original,Alias,Key)
@@ -278,6 +330,10 @@ public class ConexionSGBD {
     public TablaAlias getDesTablaALias() {
         return this.tablaAlias;
     }
+    
+    public void resetDesTablaALias() {
+        this.tablaAlias = new TablaAlias();
+    }
 
     public boolean crearTablaRdf(TablaAlias tabla) {
         Boolean bandera = false;
@@ -302,21 +358,29 @@ public class ConexionSGBD {
                         stmt.executeQuery(_selectDB);
                         _createTable = "CREATE TABLE IF NOT EXISTS " + nombreTabla + " (sujeto varchar(250), predicado varchar(250), objeto varchar(250))";
 
-                    } else {
+                    }
+                    if (SGBD == 1) {
                         _createTable = "CREATE TABLE " + nombreTabla + " (sujeto varchar(250), predicado varchar(250), objeto varchar(250))";
 
                     }
+                    
+                    if (SGBD == 2) {
+                        _createTable = "CREATE TABLE " + nombreTabla + " (sujeto varchar(250), predicado varchar(250), objeto varchar(250))";
+                    }
+                    
                     System.out.println(_createTable);
                     stmt.execute(_createTable);
+                    
                     String _leerValores = "select * from " + tabla.getTablaAlias().get(1).getOriginal();
-                    System.out.println(_leerValores);
+                    System.out.println("Leyendo registros =>"+_leerValores);
                     rs = stmt.executeQuery(_leerValores);
+                    
                     for (int i = 2; i < tabla.getTamaño(); i++) {
                         if ("PRI".equals(tabla.getTablaAlias().get(i).getKey())) {
                             clavePrimaria = tabla.getTablaAlias().get(i).getOriginal();
                         }
                     }
-                    int cont = 2;
+                    int cont = 0;
 
                     Alias nuevo = new Alias();
                     nuevo.setOriginal("tipo de recurso");
@@ -348,6 +412,7 @@ public class ConexionSGBD {
                             }
                             cont = cont + 1;
                         }
+                        System.out.println("El contador => "+cont);
                     }
                     JOptionPane.showMessageDialog(null, "Tabla convertida exitosamente.");
 
